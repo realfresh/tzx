@@ -5,8 +5,11 @@ import tsup from "tsup";
 import crypto from "node:crypto";
 import { $, path, fs, argv, chalk } from "zx";
 var id = crypto.randomBytes(6).toString("hex");
-var dir = path.resolve(process.cwd(), `.${id}`);
+var dir = path.resolve(process.cwd(), `.tzx-${id}`);
 var args = process.argv.slice(3);
+var clean = () => fs.rmSync(dir, { recursive: true });
+process.on("SIGINT", clean);
+process.on("SIGTERM", clean);
 try {
   const input = argv._[0];
   if (!input) {
@@ -46,9 +49,9 @@ try {
     await $`zx ${output} ${args.join(" ")}`.pipe(process.stdout);
   } catch {
   }
-  await $`rm -rf ${dir}`.quiet();
+  clean();
 } catch (e) {
-  await $`rm -rf ${dir}`.quiet();
+  clean();
   console.error(e);
   process.exit(1);
 }

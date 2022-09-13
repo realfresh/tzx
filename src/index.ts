@@ -13,12 +13,14 @@ process.on("SIGINT", clean);
 process.on("SIGTERM", clean);
 
 try {
-  const input = argv._[0];
+  let input = argv._[0];
   if (!input) {
     console.log(chalk.red("\n[Error]"));
     console.log(`No file specified`);
     process.exit(1);
   }
+
+  if (!input.includes(".")) input += ".tz";
 
   const output = path.resolve(dir, input.replace(".ts", ".js"));
   const outputPKG = path.resolve(dir, `package.json`);
