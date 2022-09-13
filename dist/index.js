@@ -42,7 +42,7 @@ try {
   const updated = content.replace(/^import.*("|')zx(";|';|"|')/gm, "");
   await fs.writeFile(output, updated);
   try {
-    await $`zx ${output}`.stdio("inherit");
+    await $`zx ${output}`.pipe(process.stdout);
   } catch {
   }
   await $`rm -rf ${dir}`.quiet();

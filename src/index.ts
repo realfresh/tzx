@@ -5,6 +5,7 @@ import { $, path, fs, argv, chalk } from "zx";
 
 const id = crypto.randomBytes(6).toString("hex");
 const dir = path.resolve(process.cwd(), `.${id}`);
+const args = process.argv.slice(3);
 
 try {
   const input = argv._[0];
@@ -48,7 +49,7 @@ try {
   await fs.writeFile(output, updated);
 
   try {
-    await $`zx ${output}`.pipe(process.stdout); // .stdio("inherit");
+    await $`zx ${output} ${args.join(" ")}`.pipe(process.stdout); // .stdio("inherit");
   } catch {}
 
   await $`rm -rf ${dir}`.quiet();
