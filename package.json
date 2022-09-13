@@ -4,6 +4,7 @@
   "description": "Easily execute zx scripts written in typescript",
   "main": "./dist/index.js",
   "bin": "./dist/index.js",
+  "repository": "https://github.com/realfresh/tzx",
   "type": "module",
   "tsup": {
     "target": ["node16"],
