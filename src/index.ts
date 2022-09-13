@@ -4,8 +4,13 @@ import crypto from "node:crypto";
 import { $, path, fs, argv, chalk } from "zx";
 
 const id = crypto.randomBytes(6).toString("hex");
-const dir = path.resolve(process.cwd(), `.${id}`);
+const dir = path.resolve(process.cwd(), `.tzx-${id}`);
 const args = process.argv.slice(3);
+
+const clean = () => fs.rmSync(dir, { recursive: true });
+
+process.on("SIGINT", clean);
+process.on("SIGTERM", clean);
 
 try {
   const input = argv._[0];
@@ -52,9 +57,9 @@ try {
     await $`zx ${output} ${args.join(" ")}`.pipe(process.stdout); // .stdio("inherit");
   } catch {}
 
-  await $`rm -rf ${dir}`.quiet();
+  clean();
 } catch (e) {
-  await $`rm -rf ${dir}`.quiet();
+  clean();
   console.error(e);
   process.exit(1);
 }

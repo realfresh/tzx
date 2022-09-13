@@ -6,6 +6,7 @@ import crypto from "node:crypto";
 import { $, path, fs, argv, chalk } from "zx";
 var id = crypto.randomBytes(6).toString("hex");
 var dir = path.resolve(process.cwd(), `.${id}`);
+var args = process.argv.slice(3);
 try {
   const input = argv._[0];
   if (!input) {
@@ -42,7 +43,7 @@ try {
   const updated = content.replace(/^import.*("|')zx(";|';|"|')/gm, "");
   await fs.writeFile(output, updated);
   try {
-    await $`zx ${output}`.pipe(process.stdout);
+    await $`zx ${output} ${args.join(" ")}`.pipe(process.stdout);
   } catch {
   }
   await $`rm -rf ${dir}`.quiet();
