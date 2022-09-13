@@ -7,7 +7,11 @@ const id = crypto.randomBytes(6).toString("hex");
 const dir = path.resolve(process.cwd(), `.tzx-${id}`);
 const args = process.argv.slice(3);
 
-const clean = () => fs.rmSync(dir, { recursive: true });
+const clean = () => {
+  try {
+    fs.rmSync(dir, { recursive: true });
+  } catch {}
+};
 
 process.on("SIGINT", clean);
 process.on("SIGTERM", clean);
