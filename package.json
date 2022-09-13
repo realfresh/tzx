@@ -1,0 +1,29 @@
+{
+  "name": "tzx",
+  "version": "0.1.0",
+  "main": "./dist/index.js",
+  "bin": "./dist/index.js",
+  "type": "module",
+  "tsup": {
+    "target": ["node16"],
+    "format": "esm",
+    "sourcemap": true,
+    "clean": true
+  },
+  "scripts": {
+    "link": "npm link",
+    "watch": "tsup-node --watch ./src/index.ts",
+    "build": "tsup-node ./src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "zx": "7.0.8"
+  },
+  "devDependencies": {
+    "tsup": "^6.2.3",
+    "@tsconfig/node16-strictest-esm": "^1.0.3",
+    "prettier": "^2.7.1"
+  },
+  "author": "",
+  "license": "ISC"
+}
