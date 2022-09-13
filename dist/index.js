@@ -7,7 +7,12 @@ import { $, path, fs, argv, chalk } from "zx";
 var id = crypto.randomBytes(6).toString("hex");
 var dir = path.resolve(process.cwd(), `.tzx-${id}`);
 var args = process.argv.slice(3);
-var clean = () => fs.rmSync(dir, { recursive: true });
+var clean = () => {
+  try {
+    fs.rmSync(dir, { recursive: true });
+  } catch {
+  }
+};
 process.on("SIGINT", clean);
 process.on("SIGTERM", clean);
 try {
