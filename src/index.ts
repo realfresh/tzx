@@ -48,7 +48,7 @@ try {
   await fs.writeFile(output, updated);
 
   try {
-    await $`zx ${output}`.stdio("inherit");
+    await $`zx ${output}`.pipe(process.stdout); // .stdio("inherit");
   } catch {}
 
   await $`rm -rf ${dir}`.quiet();
