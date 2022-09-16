@@ -1,6 +1,6 @@
 {
   "name": "tzx",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "Easily execute zx scripts written in typescript",
   "main": "./dist/index.js",
   "bin": "./dist/index.js",
