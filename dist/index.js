@@ -53,7 +53,7 @@ try {
   const updated = content.replace(/^import.*("|')zx(";|';|"|')/gm, "");
   await fs.writeFile(output, updated);
   try {
-    await $`zx ${output} ${args.join(" ")}`.pipe(process.stdout);
+    await $`zx ${output} ${args}`.pipe(process.stdout);
   } catch {
   }
   clean();

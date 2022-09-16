@@ -1,6 +1,6 @@
 {
   "name": "tzx",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Easily execute zx scripts written in typescript",
   "main": "./dist/index.js",
   "bin": "./dist/index.js",
@@ -20,10 +20,10 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "zx": "7.0.8"
+    "zx": "7.0.8",
+    "tsup": "^6.2.3"
   },
   "devDependencies": {
-    "tsup": "^6.2.3",
     "@tsconfig/node16-strictest-esm": "^1.0.3",
     "prettier": "^2.7.1"
   },
