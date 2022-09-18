@@ -60,7 +60,8 @@ try {
   await fs.writeFile(output, updated);
 
   try {
-    await $`zx ${output} ${args}`.quiet().pipe(process.stdout); // .stdio("inherit");
+    // await $`zx ${output} ${args}`.quiet().pipe(process.stdout); // .stdio("inherit");
+    await $`zx ${output} ${args}`.stdio("inherit");
   } catch {}
 
   clean();
