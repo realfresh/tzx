@@ -1,30 +1,33 @@
 {
   "name": "tzx",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "Easily execute zx scripts written in typescript",
   "main": "./dist/index.js",
   "bin": "./dist/index.js",
   "repository": "https://github.com/realfresh/tzx",
   "type": "module",
   "tsup": {
-    "target": ["node16"],
+    "target": [
+      "node16"
+    ],
     "format": "esm",
     "sourcemap": true,
     "clean": true
   },
   "scripts": {
     "link": "npm link",
-    "watch": "tsup-node --watch ./src/index.ts",
+    "watch": "tsup-node ./src/index.ts --watch",
     "build": "tsup-node ./src/index.ts",
     "pub": "git add . && git commit -am . ; npm publish",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "zx": "7.0.8",
-    "tsup": "^6.2.3"
+    "esbuild": "^0.15.9",
+    "zx": "^7.0.8"
   },
   "devDependencies": {
     "@tsconfig/node16-strictest-esm": "^1.0.3",
+    "tsup": "^6.2.3",
     "prettier": "^2.7.1"
   },
   "author": "",

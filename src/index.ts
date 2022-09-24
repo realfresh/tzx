@@ -1,72 +1,102 @@
 #!/usr/bin/env node
-import tsup from "tsup";
+import os from "node:os";
+import child from "node:child_process";
+import process from "node:process";
 import crypto from "node:crypto";
-import { $, path, fs, argv, chalk } from "zx";
+import path from "node:path";
+import fs from "node:fs";
+import esbuild, { Loader, Plugin } from "esbuild";
 
+let proc: child.ChildProcess;
+let tmpFilePath: string;
 const id = crypto.randomBytes(6).toString("hex");
-const dir = path.resolve(process.cwd(), `.tzx-${id}`);
-const args = process.argv.slice(3);
+const out = path.resolve(process.cwd(), `.tzx-${id}.mjs`);
 
-const clean = () => {
+function clean() {
   try {
-    fs.rmSync(dir, { recursive: true });
+    fs.rmSync(out);
   } catch {}
-};
+  try {
+    if (tmpFilePath) fs.rmSync(tmpFilePath);
+  } catch {}
+  try {
+    if (proc) proc.kill();
+  } catch {}
+}
+function exit(exitCode: number, err?: any) {
+  clean();
+  if (err) console.error(err);
+  process.exit(exitCode);
+}
+async function bundle(inputFilePath: string) {
+  const ext = path.extname(inputFilePath);
+  if (!ext) {
+    tmpFilePath = path.resolve(os.tmpdir(), `${id}.ts`);
+    fs.copyFileSync(inputFilePath, tmpFilePath);
+  }
+
+  const loader: { [key: string]: Loader } = ext ? { [ext]: "ts" } : {};
+  const plugins: Plugin[] = [
+    {
+      name: "make-all-packages-external",
+      setup(build) {
+        const filter = /^[^./]|^\.[^./]|^\.\.[^/]/; // Must not start with "/" or "./" or "../"
+        build.onResolve({ filter }, ({ path }) => {
+          return { path: path, external: true };
+        });
+      },
+    },
+  ];
+
+  const result = await esbuild.build({
+    entryPoints: [tmpFilePath || inputFilePath],
+    write: false,
+    bundle: true,
+    platform: "node",
+    target: "node16",
+    format: "esm",
+    minify: false,
+    external: [],
+    sourcemap: true,
+    loader: loader,
+    plugins: plugins,
+  });
+
+  return result.outputFiles[0]!.text;
+}
 
 process.on("SIGINT", clean);
 process.on("SIGTERM", clean);
 
 try {
-  let input = argv._[0];
+  let input = process.argv[2];
   if (!input) {
-    console.log(chalk.red("\n[Error]"));
-    console.log(`No file specified`);
+    console.error("\n[Error]");
+    console.error(`No file specified`);
     process.exit(1);
   }
 
-  if (!input.includes(".")) input += ".tz";
+  const script = await bundle(input);
+  const scriptClean = script.replace(/^import.*("|')zx(";|';|"|')/gm, "");
 
-  const output = path.resolve(dir, input.replace(".ts", ".js"));
-  const outputPKG = path.resolve(dir, `package.json`);
-  const outputTSConfig = path.resolve(dir, `tsconfig.json`);
+  fs.writeFileSync(out, scriptClean);
 
-  await $`rm -rf ${dir}`.quiet();
-  await $`mkdir -p ${dir}`.quiet();
-  await $`cp ${input} ${dir}/${input}`.quiet();
-
-  await fs.writeJSON(outputPKG, {
-    name: "__tmp_script__",
-    version: "1.0.0",
-    type: "module",
-  });
-  await fs.writeJSON(outputTSConfig, {});
-
-  await tsup.build({
-    config: false,
-    entry: [`${dir}/${input}`],
-    outDir: dir,
-    format: "esm",
-    target: "node16",
-    platform: "node",
-    skipNodeModulesBundle: true,
-    splitting: false,
-    silent: true,
-    noExternal: [/.*/],
-    outExtension: () => ({ js: ".js" }),
+  proc = child.spawn("zx", [out], {
+    stdio: "inherit",
+    env: { ...process.env },
   });
 
-  const content = await fs.readFile(output, "utf8");
-  const updated = content.replace(/^import.*("|')zx(";|';|"|')/gm, "");
-  await fs.writeFile(output, updated);
-
-  try {
-    // await $`zx ${output} ${args}`.quiet().pipe(process.stdout); // .stdio("inherit");
-    await $`zx ${output} ${args}`.stdio("inherit");
-  } catch {}
-
-  clean();
+  proc.on("exit", async (exitCode, signalCode) => {
+    if (exitCode === 0) {
+      exit(exitCode);
+    } else {
+      exit(
+        exitCode || 1,
+        `Non-zero exit: code ${exitCode}, signal ${signalCode}`
+      );
+    }
+  });
+  proc.on("error", (err) => exit(1, err));
 } catch (e) {
-  clean();
-  console.error(e);
-  process.exit(1);
+  exit(1, e);
 }
